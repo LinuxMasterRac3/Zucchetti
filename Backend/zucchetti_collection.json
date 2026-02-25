@@ -1,0 +1,112 @@
+{
+	"info": {
+		"_postman_id": "f4d635da-bd80-4f3e-9bdb-c35532e7ad30",
+		"name": "Zucchetti PHP API",
+		"description": "Collection of APIs for the Zucchetti project",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "GET Data",
+			"item": [
+				{
+					"name": "Get Assets",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "http://localhost/InizioPHP/Zucchetti /api_assets.php"
+					}
+				},
+				{
+					"name": "Get Users",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "http://localhost/InizioPHP/Zucchetti /api_utenti.php"
+					}
+				},
+				{
+					"name": "Get Roles",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "http://localhost/InizioPHP/Zucchetti /api_ruoli.php"
+					}
+				},
+				{
+					"name": "Get Asset Types",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "http://localhost/InizioPHP/Zucchetti /api_tipi_asset.php"
+					}
+				},
+				{
+					"name": "Get Bookings",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "http://localhost/InizioPHP/Zucchetti /api_prenotazioni.php"
+					}
+				}
+			]
+		},
+		{
+			"name": "Modification",
+			"item": [
+				{
+					"name": "Delete Record",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost/InizioPHP/Zucchetti /api_delete.php?table=prenotazioni&id=1",
+							"protocol": "http",
+							"host": [ "localhost" ],
+							"path": [ "InizioPHP", "Zucchetti ", "api_delete.php" ],
+							"query": [
+								{ "key": "table", "value": "prenotazioni" },
+								{ "key": "id", "value": "1" }
+							]
+						}
+					}
+				},
+				{
+					"name": "Update Asset Status",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost/InizioPHP/Zucchetti /api_update_asset.php?id=1&stato=disponibile",
+							"protocol": "http",
+							"host": [ "localhost" ],
+							"path": [ "InizioPHP", "Zucchetti ", "api_update_asset.php" ],
+							"query": [
+								{ "key": "id", "value": "1" },
+								{ "key": "stato", "value": "disponibile" }
+							]
+						}
+					}
+				},
+				{
+					"name": "Update User Info",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost/InizioPHP/Zucchetti /api_update_user.php?id=1&nome=Mario&cognome=Rossi",
+							"protocol": "http",
+							"host": [ "localhost" ],
+							"path": [ "InizioPHP", "Zucchetti ", "api_update_user.php" ],
+							"query": [
+								{ "key": "id", "value": "1" },
+								{ "key": "nome", "value": "Mario" },
+								{ "key": "cognome", "value": "Rossi" }
+							]
+						}
+					}
+				}
+			]
+		}
+	]
+}
