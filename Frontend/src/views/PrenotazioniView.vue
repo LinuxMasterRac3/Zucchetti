@@ -32,7 +32,7 @@ const actionSuccess = ref<string | null>(null)
 
 // Edit state
 const editingBooking = ref<Booking | null>(null)
-const editData = ref({ data_prenotazione: '', ora_inizio: '', ora_fine: '' })
+const editData = ref({ data_prenotazione: '' })
 
 const filteredBookings = computed(() => {
   if (filterStato.value === 'tutte') return bookings.value
@@ -70,9 +70,7 @@ async function cancelBooking(id: number) {
 function startEdit(booking: Booking) {
   editingBooking.value = booking
   editData.value = {
-    data_prenotazione: booking.data_prenotazione,
-    ora_inizio: booking.ora_inizio.substring(0, 5),
-    ora_fine: booking.ora_fine.substring(0, 5),
+    data_prenotazione: booking.data_prenotazione
   }
 }
 
@@ -177,8 +175,7 @@ onMounted(loadBookings)
             </div>
             <p class="text-xs text-gray-500">{{ booking.tipo_descrizione }}</p>
             <div class="flex gap-4 mt-2 text-xs text-gray-400">
-              <span>📅 {{ booking.data_prenotazione }}</span>
-              <span>🕐 {{ booking.ora_inizio?.substring(0, 5) }} – {{ booking.ora_fine?.substring(0, 5) }}</span>
+              <span>📅 {{ booking.data_prenotazione }} (Intera Giornata)</span>
               <span>✏️ Mod: {{ booking.modifiche_counter }}/2</span>
             </div>
             <p v-if="booking.id_utente !== authStore.user?.id" class="text-xs text-gray-500 mt-1">
@@ -207,20 +204,10 @@ onMounted(loadBookings)
 
         <!-- Inline Edit Form -->
         <div v-if="editingBooking?.id === booking.id" class="mt-4 pt-4 border-t border-gray-800/50">
-          <div class="grid grid-cols-3 gap-3">
+          <div class="gap-3 max-w-sm">
             <div>
-              <label class="block text-xs text-gray-500 mb-1">Data</label>
+              <label class="block text-xs text-gray-500 mb-1">Nuova Data</label>
               <input v-model="editData.data_prenotazione" type="date"
-                class="w-full px-3 py-2 bg-gray-800/50 border border-gray-700/50 rounded-lg text-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500/50" />
-            </div>
-            <div>
-              <label class="block text-xs text-gray-500 mb-1">Inizio</label>
-              <input v-model="editData.ora_inizio" type="time"
-                class="w-full px-3 py-2 bg-gray-800/50 border border-gray-700/50 rounded-lg text-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500/50" />
-            </div>
-            <div>
-              <label class="block text-xs text-gray-500 mb-1">Fine</label>
-              <input v-model="editData.ora_fine" type="time"
                 class="w-full px-3 py-2 bg-gray-800/50 border border-gray-700/50 rounded-lg text-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500/50" />
             </div>
           </div>

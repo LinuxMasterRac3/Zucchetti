@@ -17,8 +17,8 @@ const emit = defineEmits<{
   (e: 'created'): void
 }>()
 
-const oraInizio = ref('09:00')
-const oraFine = ref('18:00')
+const oraInizio = ref('00:00:00')
+const oraFine = ref('23:59:59')
 const loading = ref(false)
 const error = ref<string | null>(null)
 const success = ref(false)
@@ -97,26 +97,10 @@ async function handleSubmit() {
           </p>
         </div>
 
-        <!-- Time -->
-        <div class="grid grid-cols-2 gap-4">
-          <div>
-            <label class="block text-sm font-medium text-gray-400 mb-2">Ora inizio</label>
-            <input
-              v-model="oraInizio"
-              type="time"
-              required
-              class="w-full px-4 py-3 bg-gray-800/50 border border-gray-700/50 rounded-xl text-gray-200 focus:outline-none focus:ring-2 focus:ring-sky-500/50 text-sm"
-            />
-          </div>
-          <div>
-            <label class="block text-sm font-medium text-gray-400 mb-2">Ora fine</label>
-            <input
-              v-model="oraFine"
-              type="time"
-              required
-              class="w-full px-4 py-3 bg-gray-800/50 border border-gray-700/50 rounded-xl text-gray-200 focus:outline-none focus:ring-2 focus:ring-sky-500/50 text-sm"
-            />
-          </div>
+        <!-- Full Day Info -->
+        <div class="px-4 py-3 bg-sky-500/10 border border-sky-500/20 rounded-xl text-sky-400 text-sm flex items-center gap-2">
+          <span>🕒</span>
+          <span>Prenotazione valida per l'intera giornata.</span>
         </div>
 
         <!-- Submit -->
