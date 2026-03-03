@@ -1,11 +1,5 @@
 <?php
-/**
- * API DI AUTENTICAZIONE
- * 
- * POST /auth.php                → Login (username, password, captcha_answer)
- * GET  /auth.php?action=check   → Verifica sessione attiva
- * POST /auth.php?action=logout  → Logout (distrugge sessione)
- */
+
 require_once 'config.php';
 
 $method = $_SERVER['REQUEST_METHOD'];
@@ -135,7 +129,7 @@ function handleLogout() {
     $_SESSION = [];
     if (ini_get("session.use_cookies")) {
         $params = session_get_cookie_params();
-        setcookie(session_name(), '', time() - 42000,
+        setcookie(session_name(), '', time() - 3600,
             $params["path"], $params["domain"],
             $params["secure"], $params["httponly"]
         );
