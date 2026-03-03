@@ -35,4 +35,5 @@ coverage
 *.timestamp-*-*.mjs
 
 # Sensitive
+.env
 API/config.php.bak

@@ -1,0 +1,12 @@
+.git
+.gitignore
+*.md
+*.log
+*.png
+Frontend/node_modules
+Frontend/dist
+Frontend/.vscode
+Backend/*.log
+BaseGrafica
+DynamicCaptcha.vue
+Login.vue

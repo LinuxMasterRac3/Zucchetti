@@ -1,0 +1,55 @@
+
+services:
+  # ─── MySQL Database ────────────────────────────────────────────
+  db:
+    image: mysql:8.0
+    container_name: zucchetti-db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-rootpass}
+      MYSQL_DATABASE: ${DB_NAME:-z_volta_db}
+      MYSQL_USER: ${DB_USER:-zucchetti}
+      MYSQL_PASSWORD: ${DB_PASS:-zucchetti123}
+    volumes:
+      - db_data:/var/lib/mysql
+      - ./Backend/database.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+    ports:
+      - "3306:3306"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${DB_ROOT_PASSWORD:-rootpass}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ─── PHP API (Apache) ─────────────────────────────────────────
+  api:
+    build:
+      context: ./API
+      dockerfile: Dockerfile
+    container_name: zucchetti-api
+    restart: unless-stopped
+    environment:
+      DB_HOST: db
+      DB_USER: ${DB_USER:-zucchetti}
+      DB_PASS: ${DB_PASS:-zucchetti123}
+      DB_NAME: ${DB_NAME:-z_volta_db}
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "8081:80"
+
+  # ─── Frontend (Nginx) ─────────────────────────────────────────
+  frontend:
+    build:
+      context: ./Frontend
+      dockerfile: Dockerfile
+    container_name: zucchetti-frontend
+    restart: unless-stopped
+    depends_on:
+      - api
+    ports:
+      - "8080:80"
+
+volumes:
+  db_data:
