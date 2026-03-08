@@ -55,52 +55,94 @@ onMounted(loadAssets)
 </script>
 
 <template>
-  <div class="min-h-screen">
-    <!-- Header -->
-    <div class="mb-8">
-      <h1 class="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-sky-400 to-indigo-500 mb-2">
-        Mappa e Prenotazioni Interattiva
-      </h1>
-      <p class="text-gray-400">Esplora l'ufficio virtuale, seleziona una data dal calendario e prenota la tua postazione ideale.</p>
+  <div class="min-h-screen bg-black p-6 md:p-10 font-sans text-gray-300">
+    
+    <div class="mb-10">
+      <div class="flex items-center gap-2 mb-2">
+        <span class="w-2 h-2 bg-emerald-500 rounded-full shadow-[0_0_8px_#10b981] animate-pulse"></span>
+        <span class="text-[10px] font-black text-emerald-500 uppercase tracking-[0.2em]">Live Asset Mapping</span>
+      </div>
+      <h1 class="text-4xl font-extrabold text-white tracking-tight italic uppercase">Mappa Interattiva</h1>
+      <p class="text-gray-500 text-lg mt-1 font-medium italic">Seleziona una postazione e verifica la disponibilità in tempo reale.</p>
     </div>
 
-    <div class="flex flex-col lg:flex-row gap-8 items-start">
-      <!-- Sidebar / Calendar -->
-      <div class="w-full lg:w-[320px] shrink-0 sticky top-6 z-20">
-        <CalendarWidget v-model="selectedDate" />
+    <div class="flex flex-col lg:flex-row gap-10 items-start">
+      
+      <div class="w-full lg:w-[350px] shrink-0 lg:sticky lg:top-10 z-20 space-y-6">
         
-        <!-- Info Card -->
-        <div class="mt-6 bg-gray-900/60 border border-gray-800 rounded-3xl p-5 backdrop-blur-xl shadow-2xl">
-          <h3 class="text-sm font-semibold text-gray-300 mb-4 flex items-center gap-2">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-sky-400"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
-            Indicazioni
+        <div class="bg-zinc-900/40 backdrop-blur-xl border border-white/5 rounded-[2rem] p-2 shadow-2xl">
+          <CalendarWidget v-model="selectedDate" />
+        </div>
+        
+        <div class="bg-zinc-800/20 backdrop-blur-2xl border border-white/10 rounded-[2rem] p-8 shadow-3xl relative overflow-hidden">
+          <div class="absolute -right-8 -top-8 w-24 h-24 bg-sky-500/5 rounded-full blur-3xl"></div>
+          
+          <h3 class="text-[11px] font-black text-zinc-500 uppercase tracking-[0.2em] mb-6 flex items-center gap-2">
+            <span class="w-1 h-4 bg-sky-500 rounded-full"></span>
+            Parametri Sessione
           </h3>
-          <div class="flex justify-between items-center mb-3 p-3 bg-gray-800/50 rounded-xl">
-            <span class="text-xs text-gray-400 uppercase font-medium">Data:</span>
-            <span class="text-sm font-bold text-sky-400">{{ selectedDate.split('-').reverse().join('/') }}</span>
+          
+          <div class="space-y-4">
+            <div class="p-4 bg-black/40 rounded-2xl border border-white/5 group hover:border-white/10 transition-colors">
+              <p class="text-[9px] font-black text-zinc-600 uppercase tracking-widest mb-1">Data Operativa</p>
+              <p class="text-xl font-black text-sky-400 font-mono italic">
+                {{ selectedDate.split('-').reverse().join(' / ') }}
+              </p>
+            </div>
+            
+            <div class="p-4 bg-black/40 rounded-2xl border border-white/5">
+              <p class="text-[9px] font-black text-zinc-600 uppercase tracking-widest mb-3">Legenda Stato</p>
+              <div class="space-y-2">
+                <div class="flex items-center gap-3">
+                  <span class="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_5px_#10b981]"></span>
+                  <span class="text-[10px] font-bold text-zinc-400 uppercase tracking-tighter">Disponibile</span>
+                </div>
+                <div class="flex items-center gap-3">
+                  <span class="w-2 h-2 rounded-full bg-red-600 shadow-[0_0_5px_#dc2626]"></span>
+                  <span class="text-[10px] font-bold text-zinc-400 uppercase tracking-tighter">Occupato / Riservato</span>
+                </div>
+                <div class="flex items-center gap-3">
+                  <span class="w-2 h-2 rounded-full bg-zinc-700"></span>
+                  <span class="text-[10px] font-bold text-zinc-400 uppercase tracking-tighter">Non Prenotabile</span>
+                </div>
+              </div>
+            </div>
           </div>
-          <p class="text-xs text-gray-500 leading-relaxed">
-            Seleziona una postazione libera direttamente dalla mappa vettoriale qui a fianco.
+
+          <p class="mt-6 text-[10px] text-zinc-600 italic font-medium leading-relaxed px-2">
+            * Clicca su un elemento della mappa per inizializzare la procedura di prenotazione.
           </p>
         </div>
       </div>
       
-      <!-- Main Content / Vector Map -->
-      <div class="flex-1 min-w-0 w-full z-10">
-        <div v-if="loading" class="flex flex-col items-center justify-center py-32 bg-gray-900/40 border border-gray-800 rounded-3xl backdrop-blur-xl h-[800px]">
-          <div class="w-12 h-12 border-4 border-sky-500/30 border-t-sky-500 rounded-full animate-spin mb-4"></div>
-          <p class="text-sky-400 font-bold animate-pulse">Analisi della disponibilità...</p>
+      <div class="flex-1 min-w-0 w-full relative">
+        <div class="bg-zinc-900/30 backdrop-blur-sm border border-white/5 rounded-[3rem] overflow-hidden shadow-3xl min-h-[700px] flex items-center justify-center relative">
+          
+          <div v-if="loading" class="absolute inset-0 z-30 flex flex-col items-center justify-center bg-black/60 backdrop-blur-md">
+            <div class="relative w-16 h-16">
+              <div class="absolute inset-0 border-4 border-emerald-500/10 rounded-full"></div>
+              <div class="absolute inset-0 border-4 border-t-emerald-500 rounded-full animate-spin"></div>
+            </div>
+            <p class="mt-6 text-[10px] font-black text-emerald-500 uppercase tracking-[0.4em] animate-pulse">Syncing Vector Data...</p>
+          </div>
+          
+          <div class="w-full h-full p-4 md:p-8 group">
+            <OfficeMap 
+              v-if="!loading || assets.length > 0" 
+              :assets="assets" 
+              @select="openBooking" 
+            />
+          </div>
+
+          <div class="absolute bottom-6 right-10 pointer-events-none opacity-20">
+            <p class="text-[40px] font-black italic text-white/10 select-none uppercase tracking-tighter text-right leading-none">
+              Z-Volta<br/>HQ Layout
+            </p>
+          </div>
         </div>
-        
-        <OfficeMap 
-          v-else 
-          :assets="assets" 
-          @select="openBooking" 
-        />
       </div>
     </div>
 
-    <!-- Booking Modal -->
     <BookingModal
       v-if="showBookingModal && selectedAsset"
       :asset="selectedAsset"
@@ -110,3 +152,16 @@ onMounted(loadAssets)
     />
   </div>
 </template>
+
+<style scoped>
+/* Rende il calendario più coerente con lo stile dark se non ha già i suoi stili */
+:deep(.calendar-widget-container) {
+  background: transparent !important;
+  color: white !important;
+}
+
+/* Scrollbar invisibile per aree mappa se necessario */
+::-webkit-scrollbar {
+  width: 0px;
+}
+</style>

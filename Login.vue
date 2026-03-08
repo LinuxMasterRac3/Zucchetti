@@ -2,7 +2,9 @@
   <div class="login-container">
     <div class="login-card">
       <div class="login-header">
-        <h1>Z-Book Login</h1>
+        <div class="flex justify-center mb-6">
+          <img src="../assets/zbook_box_logo.png" alt="Logo Z-Book" width="200" height="50">
+        </div>
         <p>Accedi al tuo account</p>
       </div>
 
@@ -71,18 +73,12 @@ import DynamicCaptcha from '@/components/DynamicCaptcha.vue'
 const router = useRouter()
 const authStore = useAuthStore()
 
-const form = ref({
-  username: '',
-  password: ''
-})
-
+const form = ref({ username: '', password: '' })
 const errorMessage = ref('')
 const isLoading = ref(false)
 const captchaValidated = ref(false)
 
-const handleCaptchaValidate = (isValid: boolean) => {
-  captchaValidated.value = isValid
-}
+const handleCaptchaValidate = (isValid: boolean) => { captchaValidated.value = isValid }
 
 const handleLogin = async () => {
   if (!form.value.username || !form.value.password) {
@@ -105,62 +101,54 @@ const handleLogin = async () => {
 
   try {
     const result = await authStore.login(form.value.username, form.value.password)
-
-    if (result.success) {
-      // Redirect to dashboard or home page
-      setTimeout(() => {
-        router.push('/')
-      }, 500)
-    } else {
+    if (result.success) setTimeout(() => router.push('/'), 500)
+    else {
       errorMessage.value = result.message || 'Errore durante il login'
       captchaValidated.value = false
     }
   } catch (error) {
-    console.error('Login error:', error)
+    console.error(error)
     errorMessage.value = 'Errore di connessione al server'
-  } finally {
-    isLoading.value = false
-  }
+  } finally { isLoading.value = false }
 }
 </script>
 
 <style scoped>
+/* Container */
 .login-container {
   display: flex;
   justify-content: center;
   align-items: center;
   min-height: 100vh;
-  background: linear-gradient(135deg, #f7f7f7 0%);
+  background: #1c1c1c; /* sfondo grigio scuro */
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
+/* Card trasparente */
 .login-card {
-  background: white;
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
   padding: 2rem;
-  border-radius: 10px;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+  border-radius: 15px;
   width: 100%;
   max-width: 400px;
+  border: 1px solid rgba(255, 69, 0, 0.5);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
 }
 
+/* Header */
 .login-header {
   text-align: center;
   margin-bottom: 2rem;
 }
 
-.login-header h1 {
-  margin: 0;
-  color: #fc7922;
-  font-size: 28px;
-  font-weight: 700;
-}
-
 .login-header p {
-  margin: 0.5rem 0 0 0;
-  color: #666;
-  font-size: 18px;
+  margin-top: 0.5rem;
+  color: #ccc;
+  font-size: 16px;
 }
 
+/* Form */
 .login-form {
   display: flex;
   flex-direction: column;
@@ -173,105 +161,74 @@ const handleLogin = async () => {
   gap: 0.5rem;
 }
 
-.form-group label {
-  font-weight: 600;
-  color: #333;
-  font-size: 14px;
-}
-
 .label-with-icon {
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  font-weight: 600;
+  color: #eee;
 }
 
-.icon {
-  font-size: 18px;
-  display: inline-block;
-}
+.icon { font-size: 18px; }
 
 .form-group input {
   padding: 0.75rem;
-  border: 2px solid #e0e0e0;
-  border-radius: 5px;
+  border: 2px solid rgba(255, 69, 0, 0.5);
+  border-radius: 8px;
   font-size: 14px;
-  transition: border-color 0.3s ease;
+  background: rgba(255, 255, 255, 0.05);
+  color: #fff;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
   font-family: inherit;
 }
 
+.form-group input::placeholder { color: #aaa; }
+
 .form-group input:focus {
   outline: none;
-  border-color: #fc7922;
-  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+  border-color: #FF4500;
+  box-shadow: 0 0 10px rgba(255, 69, 0, 0.5);
 }
 
+/* Pulsante */
 .btn-login {
   padding: 0.75rem;
-  background: linear-gradient(135deg, #fc7922 0%);
+  background: linear-gradient(135deg, #FF4500 0%, #FF6347 100%);
   color: white;
   border: none;
-  border-radius: 5px;
+  border-radius: 8px;
   font-size: 16px;
   font-weight: 600;
   cursor: pointer;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
-  font-family: inherit;
 }
 
 .btn-login:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+  box-shadow: 0 5px 20px rgba(255, 69, 0, 0.5);
 }
 
-.btn-login:disabled {
-  opacity: 0.7;
-  cursor: not-allowed;
-}
+.btn-login:disabled { opacity: 0.7; cursor: not-allowed; }
 
+/* Errori */
 .error-message {
   padding: 0.75rem;
-  background-color: #fee;
-  color: #c33;
-  border: 1px solid #fcc;
+  background-color: rgba(255, 69, 0, 0.1);
+  color: #FF4500;
+  border: 1px solid rgba(255, 69, 0, 0.3);
   border-radius: 5px;
   font-size: 14px;
   text-align: center;
 }
 
-.error-text {
-  font-size: 12px;
-  color: #c33;
-  margin-top: -0.25rem;
-}
+.error-text { font-size: 12px; color: #FF6347; margin-top: -0.25rem; }
 
-.login-footer {
-  text-align: center;
-  margin-top: 1.5rem;
-  font-size: 14px;
-}
-
-.login-footer p {
-  margin: 0;
-}
-
-.link {
-  color: #667eea;
-  text-decoration: none;
-  font-weight: 600;
-  transition: color 0.3s ease;
-}
-
-.link:hover {
-  color: #764ba2;
-}
+/* Footer */
+.login-footer { text-align: center; margin-top: 1.5rem; font-size: 14px; }
+.link { color: #FF4500; text-decoration: none; font-weight: 600; }
+.link:hover { color: #FF6347; }
 
 @media (max-width: 480px) {
-  .login-card {
-    margin: 1rem;
-  }
-
-  .login-header h1 {
-    font-size: 24px;
-  }
+  .login-card { margin: 1rem; }
 }
 </style>

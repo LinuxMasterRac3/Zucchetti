@@ -1,142 +1,130 @@
 <script setup lang="ts">
-import { onMounted } from 'vue'
+import { onMounted, onUnmounted, ref } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 
 const authStore = useAuthStore()
+const currentTime = ref(new Date())
+let timer: any = null
 
 onMounted(async () => {
   await authStore.fetchDashboard()
+  timer = setInterval(() => {
+    currentTime.value = new Date()
+  }, 1000)
+})
+
+onUnmounted(() => {
+  if (timer) clearInterval(timer)
 })
 </script>
 
 <template>
-  <div>
-    <!-- Header -->
-    <div class="mb-8">
-      <h1 class="text-2xl font-bold text-gray-100">Dashboard</h1>
-      <p class="text-gray-500 text-sm mt-1">Benvenuto nel portale Z-Volta Asset Management</p>
-    </div>
-
-    <!-- User Profile Card -->
-    <div v-if="authStore.dashboard" class="bg-gray-900/60 backdrop-blur-xl rounded-2xl border border-gray-800/50 p-6 mb-6">
-      <div class="flex items-center gap-4 mb-4">
-        <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-sky-500 to-indigo-600 flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-sky-500/20">
-          {{ authStore.dashboard.profile.nome?.charAt(0) }}{{ authStore.dashboard.profile.cognome?.charAt(0) }}
+  <div class="min-h-screen bg-black p-4 md:p-8 font-sans selection:bg-[#ff4500]/30 text-gray-300">
+    
+    <div class="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-6">
+      <div>
+        <div class="flex items-center gap-2 mb-2">
+          <span class="w-2 h-2 bg-[#ff4500] rounded-full shadow-[0_0_8px_#ff4500]"></span>
+          <span class="text-[10px] font-black text-[#ff4500] uppercase tracking-[0.2em]">Controllo Asset Z-Volta</span>
         </div>
-        <div>
-          <h2 class="text-lg font-semibold text-gray-100">
-            {{ authStore.dashboard.profile.nome }} {{ authStore.dashboard.profile.cognome }}
-          </h2>
-          <p class="text-gray-500 text-sm">@{{ authStore.dashboard.profile.username }}</p>
+        <h1 class="text-4xl font-extrabold text-white tracking-tight">Dashboard</h1>
+        <p class="text-gray-500 text-lg mt-1 font-medium">Benvenuto nel portale gestionale</p>
+      </div>
+      
+      <div class="hidden md:flex items-center gap-4 bg-zinc-900/50 p-3 rounded-2xl border border-white/5 backdrop-blur-md">
+        <div class="text-right border-r border-white/10 pr-4">
+          <p class="text-[10px] uppercase tracking-widest text-gray-500 font-bold">DATE AND CLOCK</p>
+          <p class="text-xs font-mono text-emerald-400 font-bold uppercase italic">Online / {{ currentTime.toLocaleDateString() }}</p>
         </div>
-        <div class="ml-auto text-right">
-          <span class="inline-block px-3 py-1 text-xs font-bold uppercase tracking-wider rounded-full border"
-            :class="{
-              'bg-red-500/20 text-red-300 border-red-500/30': authStore.dashboard.profile.ruolo === 'gestore',
-              'bg-amber-500/20 text-amber-300 border-amber-500/30': authStore.dashboard.profile.ruolo === 'coordinatore',
-              'bg-sky-500/20 text-sky-300 border-sky-500/30': authStore.dashboard.profile.ruolo === 'dipendente',
-            }">
-            {{ authStore.dashboard.profile.ruolo }}
-          </span>
-          <p v-if="authStore.dashboard.profile.coordinatore" class="text-gray-500 text-xs mt-1">
-            Coordinatore: {{ authStore.dashboard.profile.coordinatore }}
-          </p>
+        <div class="text-gray-200 font-mono text-sm font-bold min-w-[45px] text-center">
+          {{ currentTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) }}
         </div>
       </div>
     </div>
 
-    <!-- Stats Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-      <div class="bg-gray-900/60 backdrop-blur-xl rounded-2xl border border-gray-800/50 p-5">
-        <p class="text-gray-500 text-xs uppercase tracking-wider mb-1">Prenotazioni Attive</p>
-        <p class="text-3xl font-bold text-sky-400">{{ authStore.dashboard?.prenotazioni_attive ?? '—' }}</p>
-        <p class="text-gray-600 text-xs mt-1">
-          Max: {{ authStore.dashboard?.profile.max_prenotazioni ?? '?' }}
+    <div v-if="authStore.dashboard" class="bg-zinc-800/40 backdrop-blur-2xl rounded-[2rem] border border-white/10 p-8 mb-8 shadow-2xl relative overflow-hidden">
+      <div class="absolute -top-24 -right-24 w-64 h-64 bg-[#ff4500]/5 rounded-full blur-[80px]"></div>
+      
+      <div class="relative z-10 flex flex-col md:flex-row md:items-center gap-8">
+        <div class="flex items-center gap-6">
+          <div class="w-20 h-20 rounded-3xl bg-zinc-900 flex items-center justify-center text-white font-black text-3xl border border-white/10 shadow-inner">
+            {{ authStore.dashboard.profile.nome?.charAt(0) }}{{ authStore.dashboard.profile.cognome?.charAt(0) }}
+          </div>
+          <div>
+            <h2 class="text-3xl font-extrabold text-white tracking-tight leading-none">
+              {{ authStore.dashboard.profile.nome }} {{ authStore.dashboard.profile.cognome }}
+            </h2>
+            <p class="text-[#ff4500]/70 font-mono text-sm mt-2 font-bold tracking-tighter">@{{ authStore.dashboard.profile.username }}</p>
+          </div>
+        </div>
+
+        <div class="flex flex-wrap gap-4 md:ml-auto">
+          <div class="px-6 py-3 rounded-2xl bg-black/40 border border-white/5 backdrop-blur-sm text-center">
+             <p class="text-[10px] uppercase text-gray-500 mb-1 font-black tracking-widest">Livello Accesso</p>
+             <span class="text-sm font-black uppercase tracking-widest text-red-500">
+               ADMIN
+             </span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+      <div class="bg-zinc-800/40 backdrop-blur-xl rounded-[2rem] border border-white/10 p-7">
+        <p class="text-gray-500 text-[11px] uppercase tracking-[0.2em] font-black mb-6">Prenotazioni</p>
+        <div class="flex items-baseline gap-2 mb-4">
+          <p class="text-5xl font-black text-white tracking-tighter">{{ authStore.dashboard?.prenotazioni_attive ?? 0 }}</p>
+          <p class="text-gray-600 text-lg font-mono font-bold">/ {{ authStore.dashboard?.profile.max_prenotazioni }}</p>
+        </div>
+        <div class="h-1.5 w-full bg-black/50 rounded-full overflow-hidden border border-white/5 shadow-inner">
+          <div class="h-full bg-gradient-to-r from-[#ff4500]/50 to-[#ff4500]" :style="{ width: ((authStore.dashboard?.prenotazioni_attive / authStore.dashboard?.profile.max_prenotazioni) * 100) + '%' }"></div>
+        </div>
+      </div>
+
+      <div class="bg-zinc-800/40 backdrop-blur-xl rounded-[2rem] border border-white/10 p-7">
+        <p class="text-gray-500 text-[11px] uppercase tracking-[0.2em] font-black mb-6">Prenotazioni del giorno</p>
+        <p class="text-5xl font-black text-emerald-400 tracking-tighter">{{ authStore.dashboard?.statistiche?.prenotazioni_oggi ?? 0 }}</p>
+        <p class="text-gray-500 text-[10px] mt-4 flex items-center gap-2 font-bold uppercase tracking-widest">
+          <span class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span> Registrazioni attive
         </p>
       </div>
 
-      <!-- Gestore-only stats -->
-      <template v-if="authStore.isGestore && authStore.dashboard?.statistiche">
-        <div class="bg-gray-900/60 backdrop-blur-xl rounded-2xl border border-gray-800/50 p-5">
-          <p class="text-gray-500 text-xs uppercase tracking-wider mb-1">Prenotazioni Oggi</p>
-          <p class="text-3xl font-bold text-emerald-400">{{ authStore.dashboard.statistiche.prenotazioni_oggi }}</p>
+      <div class="bg-zinc-800/40 backdrop-blur-xl rounded-[2rem] border border-white/10 p-7">
+        <p class="text-gray-500 text-[11px] uppercase tracking-[0.2em] font-black mb-6">Organico Totale</p>
+        <p class="text-5xl font-black text-white tracking-tighter">6</p>
+        <div class="flex gap-4 mt-4">
+            <div class="flex flex-col"><span class="text-[9px] uppercase text-[#ff4500]/60 font-black">Admin</span><span class="text-xs text-white font-mono">1</span></div>
+            <div class="flex flex-col"><span class="text-[9px] uppercase text-[#ff4500]/60 font-black">Coord.</span><span class="text-xs text-white font-mono">2</span></div>
+            <div class="flex flex-col"><span class="text-[9px] uppercase text-[#ff4500]/60 font-black">Dipend.</span><span class="text-xs text-white font-mono">3</span></div>
         </div>
-        <div class="bg-gray-900/60 backdrop-blur-xl rounded-2xl border border-gray-800/50 p-5">
-          <p class="text-gray-500 text-xs uppercase tracking-wider mb-1">Utenti Totali</p>
-          <p class="text-3xl font-bold text-indigo-400">
-            {{ Object.values(authStore.dashboard.statistiche.utenti_per_ruolo).reduce((a: number, b: number) => a + b, 0) }}
-          </p>
-          <div class="flex gap-2 mt-1">
-            <span v-for="(count, role) in authStore.dashboard.statistiche.utenti_per_ruolo" :key="role" class="text-gray-600 text-xs">
-              {{ role }}: {{ count }}
-            </span>
-          </div>
-        </div>
-      </template>
-
-      <!-- Coordinatore team info -->
-      <template v-if="authStore.isCoordinatore && authStore.dashboard?.team">
-        <div class="bg-gray-900/60 backdrop-blur-xl rounded-2xl border border-gray-800/50 p-5">
-          <p class="text-gray-500 text-xs uppercase tracking-wider mb-1">Il Tuo Team</p>
-          <p class="text-3xl font-bold text-amber-400">{{ authStore.dashboard.team.length }}</p>
-          <p class="text-gray-600 text-xs mt-1">dipendenti</p>
-        </div>
-      </template>
+      </div>
     </div>
 
-    <!-- Upcoming Bookings -->
-    <div class="bg-gray-900/60 backdrop-blur-xl rounded-2xl border border-gray-800/50 p-6">
-      <h3 class="text-lg font-semibold text-gray-200 mb-4">📅 Prossime Prenotazioni</h3>
-
-      <div v-if="authStore.dashboard?.prossime_prenotazioni?.length === 0" class="text-center py-8 text-gray-600">
-        <p class="text-4xl mb-2">📭</p>
-        <p>Nessuna prenotazione attiva</p>
-        <RouterLink to="/mappa" class="inline-block mt-3 px-4 py-2 bg-sky-500/10 text-sky-400 rounded-xl text-sm font-medium hover:bg-sky-500/20 transition-colors">
-          Prenota un asset →
+    <div class="bg-zinc-800/20 backdrop-blur-3xl rounded-[2.5rem] border border-white/10 p-10 shadow-3xl">
+      <div class="flex items-center justify-between mb-10">
+        <div class="flex items-center gap-4">
+          <div class="w-2 h-8 bg-[#ff4500] rounded-full shadow-[0_0_15px_rgba(255,69,0,0.4)]"></div>
+          <h3 class="text-2xl font-extrabold text-white tracking-tight text-uppercase">Prossime Prenotazioni</h3>
+        </div>
+        <RouterLink to="/mappa" class="px-6 py-3 bg-white text-black rounded-2xl text-[10px] font-black shadow-xl hover:scale-105 transition-transform uppercase italic flex items-center gap-2">
+          Nuova Prenotazione <span>→</span>
         </RouterLink>
       </div>
 
-      <div v-else class="space-y-3">
-        <div
-          v-for="booking in authStore.dashboard?.prossime_prenotazioni"
-          :key="booking.id"
-          class="flex items-center gap-4 bg-gray-800/30 rounded-xl p-4 hover:bg-gray-800/50 transition-colors"
-        >
-          <div class="w-12 h-12 rounded-xl flex items-center justify-center text-lg font-bold"
-            :class="{
-              'bg-sky-500/10 text-sky-400': booking.codice_tipo === 'A',
-              'bg-indigo-500/10 text-indigo-400': booking.codice_tipo === 'A2',
-              'bg-emerald-500/10 text-emerald-400': booking.codice_tipo === 'B',
-              'bg-amber-500/10 text-amber-400': booking.codice_tipo === 'C',
-            }">
-            {{ booking.codice_tipo }}
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <div v-for="i in 5" :key="i" class="flex items-center gap-6 bg-zinc-800/40 p-6 rounded-3xl border border-white/5 relative overflow-hidden">
+          <div class="absolute left-0 top-1/2 -translate-y-1/2 h-12 w-1 bg-[#ff4500]/40 rounded-r-full"></div>
+          <div class="w-16 h-16 rounded-2xl bg-zinc-900 border border-white/10 flex flex-col items-center justify-center">
+            <span class="text-[9px] text-zinc-600 font-black uppercase tracking-tighter">Tipo</span>
+            <span class="text-xl font-black text-white">A2</span>
           </div>
           <div class="flex-1">
-            <p class="text-sm font-semibold text-gray-200">{{ booking.codice_univoco }}</p>
-            <p class="text-xs text-gray-500">{{ booking.tipo_descrizione }}</p>
+            <p class="text-xl font-black text-white tracking-tighter">A2-12</p>
+            <p class="text-[9px] font-black text-zinc-500 uppercase mt-1">Scrivania con monitor</p>
           </div>
-          <div class="text-right">
-            <p class="text-sm font-medium text-gray-300">{{ booking.data_prenotazione }}</p>
-            <p class="text-xs text-gray-500">{{ booking.ora_inizio }} – {{ booking.ora_fine }}</p>
-          </div>
-          <div class="text-xs text-gray-600">
-            Mod: {{ booking.modifiche_counter }}/2
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Team Members (coordinatore) -->
-    <div v-if="authStore.isCoordinatore && authStore.dashboard?.team?.length" class="mt-6 bg-gray-900/60 backdrop-blur-xl rounded-2xl border border-gray-800/50 p-6">
-      <h3 class="text-lg font-semibold text-gray-200 mb-4">👥 Il Tuo Team</h3>
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        <div v-for="member in authStore.dashboard.team" :key="member.id" class="flex items-center gap-3 bg-gray-800/30 rounded-xl p-3">
-          <div class="w-8 h-8 rounded-full bg-sky-500/20 flex items-center justify-center text-sky-400 text-sm font-bold">
-            {{ member.nome.charAt(0) }}
-          </div>
-          <div>
-            <p class="text-sm font-medium text-gray-200">{{ member.nome }} {{ member.cognome }}</p>
-            <p class="text-xs text-gray-500">@{{ member.username }}</p>
+          <div class="text-right border-l border-white/10 pl-6">
+            <p class="text-white font-mono font-black text-sm">00:00:00</p>
+            <p class="text-[9px] font-black text-zinc-500 uppercase">2026-03-07</p>
           </div>
         </div>
       </div>

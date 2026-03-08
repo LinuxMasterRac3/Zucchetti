@@ -30,7 +30,6 @@ const actionLoading = ref<number | null>(null)
 const actionError = ref<string | null>(null)
 const actionSuccess = ref<string | null>(null)
 
-// Edit state
 const editingBooking = ref<Booking | null>(null)
 const editData = ref({ data_prenotazione: '' })
 
@@ -57,11 +56,11 @@ async function cancelBooking(id: number) {
   actionError.value = null
   try {
     await bookingsApi.cancel(id)
-    actionSuccess.value = 'Prenotazione cancellata'
+    actionSuccess.value = 'Prenotazione terminata con successo'
     setTimeout(() => actionSuccess.value = null, 2000)
     await loadBookings()
   } catch (err: any) {
-    actionError.value = err.response?.data?.message || 'Errore'
+    actionError.value = err.response?.data?.message || 'Errore di sistema'
   } finally {
     actionLoading.value = null
   }
@@ -69,9 +68,7 @@ async function cancelBooking(id: number) {
 
 function startEdit(booking: Booking) {
   editingBooking.value = booking
-  editData.value = {
-    data_prenotazione: booking.data_prenotazione
-  }
+  editData.value = { data_prenotazione: booking.data_prenotazione }
 }
 
 async function saveEdit() {
@@ -80,12 +77,12 @@ async function saveEdit() {
   actionError.value = null
   try {
     const response = await bookingsApi.update(editingBooking.value.id, editData.value)
-    actionSuccess.value = `Modificata! ${response.data.modifiche_rimanenti} modifiche rimanenti`
+    actionSuccess.value = `Asset aggiornato! ${response.data.modifiche_rimanenti} modifiche restanti`
     setTimeout(() => actionSuccess.value = null, 3000)
     editingBooking.value = null
     await loadBookings()
   } catch (err: any) {
-    actionError.value = err.response?.data?.message || 'Errore nella modifica'
+    actionError.value = err.response?.data?.message || 'Modifica non autorizzata'
   } finally {
     actionLoading.value = null
   }
@@ -93,10 +90,10 @@ async function saveEdit() {
 
 function getStatoBadge(stato: string) {
   switch (stato) {
-    case 'attiva': return 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30'
-    case 'cancellata': return 'bg-gray-500/20 text-gray-400 border-gray-500/30'
-    case 'revocata': return 'bg-red-500/20 text-red-400 border-red-500/30'
-    default: return 'bg-gray-500/20 text-gray-400'
+    case 'attiva': return 'text-emerald-400 border-emerald-500/30 bg-emerald-500/5'
+    case 'cancellata': return 'text-zinc-500 border-zinc-700 bg-zinc-900/50'
+    case 'revocata': return 'text-red-500 border-red-500/20 bg-red-500/5'
+    default: return 'text-zinc-400 border-zinc-800'
   }
 }
 
@@ -104,122 +101,148 @@ onMounted(loadBookings)
 </script>
 
 <template>
-  <div>
-    <!-- Header -->
-    <div class="flex items-center justify-between mb-8">
+  <div class="min-h-screen bg-black p-6 md:p-10 font-sans text-gray-300">
+    
+    <div class="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-6">
       <div>
-        <h1 class="text-2xl font-bold text-gray-100">📋 Prenotazioni</h1>
-        <p class="text-gray-500 text-sm mt-1">Gestisci le tue prenotazioni</p>
+        <div class="flex items-center gap-2 mb-2">
+          <span class="w-2 h-2 bg-sky-500 rounded-full shadow-[0_0_8px_#0ea5e9]"></span>
+          <span class="text-[10px] font-black text-sky-500 uppercase tracking-[0.2em]">Registro Attività Z-Volta</span>
+        </div>
+        <h1 class="text-4xl font-extrabold text-white tracking-tight">Prenotazioni</h1>
+        <p class="text-gray-500 text-lg mt-1 font-medium">Gestione e storico degli asset riservati</p>
       </div>
-      <!-- Filter -->
-      <div class="flex gap-2">
+
+      <div class="flex bg-zinc-900/50 p-1.5 rounded-2xl border border-white/5 backdrop-blur-md">
         <button
           v-for="stato in ['attiva', 'cancellata', 'revocata', 'tutte']"
           :key="stato"
           @click="filterStato = stato"
-          class="px-3 py-1.5 text-xs font-semibold rounded-lg transition-all cursor-pointer capitalize"
+          class="px-5 py-2 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all"
           :class="filterStato === stato
-            ? 'bg-sky-500/20 text-sky-400 border border-sky-500/30'
-            : 'text-gray-500 hover:text-gray-300 border border-gray-800'"
+            ? 'bg-white text-black shadow-lg shadow-white/5'
+            : 'text-zinc-500 hover:text-zinc-200'"
         >
           {{ stato }}
         </button>
       </div>
     </div>
 
-    <!-- Messages -->
-    <div v-if="actionError" class="mb-4 px-4 py-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-sm">
-      {{ actionError }}
-    </div>
-    <div v-if="actionSuccess" class="mb-4 px-4 py-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-sm">
-      {{ actionSuccess }}
+    <TransitionGroup name="fade">
+      <div v-if="actionError" class="mb-6 p-4 rounded-2xl bg-red-500/10 border border-red-500/20 text-red-400 text-xs font-bold uppercase tracking-wide">
+        ⚠️ {{ actionError }}
+      </div>
+      <div v-if="actionSuccess" class="mb-6 p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-bold uppercase tracking-wide">
+        ✅ {{ actionSuccess }}
+      </div>
+    </TransitionGroup>
+
+    <div v-if="loading" class="flex flex-col items-center justify-center py-32 space-y-4">
+      <div class="w-8 h-8 border-2 border-sky-500/20 border-t-sky-500 rounded-full animate-spin"></div>
+      <p class="text-[10px] font-black text-zinc-600 uppercase tracking-[0.3em]">Sincronizzazione Database...</p>
     </div>
 
-    <div v-if="loading" class="text-center py-20 text-gray-500 animate-pulse">Caricamento...</div>
-
-    <!-- Empty State -->
-    <div v-else-if="filteredBookings.length === 0" class="text-center py-20 text-gray-600">
-      <p class="text-4xl mb-2">📭</p>
-      <p>Nessuna prenotazione trovata</p>
-      <RouterLink to="/mappa" class="inline-block mt-3 px-4 py-2 bg-sky-500/10 text-sky-400 rounded-xl text-sm font-medium hover:bg-sky-500/20 transition-colors">
-        Vai alla mappa →
+    <div v-else-if="filteredBookings.length === 0" class="bg-zinc-900/20 border-2 border-dashed border-white/5 rounded-[2.5rem] py-32 text-center">
+      <p class="text-5xl mb-6 opacity-20">📋</p>
+      <p class="text-xl font-bold text-zinc-500 italic">Nessun record trovato per questa categoria</p>
+      <RouterLink to="/mappa" class="mt-8 inline-flex items-center gap-3 px-8 py-4 bg-white text-black rounded-2xl text-[10px] font-black uppercase tracking-widest hover:scale-105 transition-transform">
+        Nuova Prenotazione <span>→</span>
       </RouterLink>
     </div>
 
-    <!-- Bookings List -->
-    <div v-else class="space-y-3">
+    <div v-else class="grid grid-cols-1 gap-4">
       <div
         v-for="booking in filteredBookings"
         :key="booking.id"
-        class="bg-gray-900/60 backdrop-blur-xl rounded-2xl border border-gray-800/50 p-5"
+        class="group bg-zinc-800/30 backdrop-blur-2xl rounded-[2rem] border border-white/5 p-6 hover:border-white/20 transition-all shadow-xl"
       >
-        <div class="flex items-start gap-4">
-          <!-- Asset Type Icon -->
-          <div class="w-12 h-12 rounded-xl flex items-center justify-center text-lg font-bold shrink-0"
+        <div class="flex flex-col md:flex-row md:items-center gap-8">
+          
+          <div class="w-20 h-20 rounded-[1.5rem] flex flex-col items-center justify-center border border-white/10 shadow-inner shrink-0 group-hover:scale-105 transition-transform bg-zinc-950"
             :class="{
-              'bg-sky-500/10 text-sky-400': booking.codice_tipo === 'A',
-              'bg-indigo-500/10 text-indigo-400': booking.codice_tipo === 'A2',
-              'bg-emerald-500/10 text-emerald-400': booking.codice_tipo === 'B',
-              'bg-amber-500/10 text-amber-400': booking.codice_tipo === 'C',
+              'text-sky-400': booking.codice_tipo === 'A',
+              'text-indigo-400': booking.codice_tipo === 'A2',
+              'text-emerald-400': booking.codice_tipo === 'B',
+              'text-amber-400': booking.codice_tipo === 'C',
             }">
-            {{ booking.codice_tipo }}
+            <span class="text-[9px] font-black uppercase opacity-40 mb-1">Asset</span>
+            <span class="text-2xl font-black italic">{{ booking.codice_tipo }}</span>
           </div>
 
-          <!-- Info -->
-          <div class="flex-1 min-w-0">
-            <div class="flex items-center gap-2 mb-1">
-              <h3 class="text-sm font-semibold text-gray-200">{{ booking.codice_univoco }}</h3>
-              <span class="px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded-full border" :class="getStatoBadge(booking.stato_prenotazione)">
+          <div class="flex-1">
+            <div class="flex flex-wrap items-center gap-3 mb-3">
+              <h3 class="text-2xl font-black text-white tracking-tighter leading-none italic uppercase">{{ booking.codice_univoco }}</h3>
+              <span class="px-3 py-1 text-[9px] font-black uppercase tracking-widest rounded-lg border" :class="getStatoBadge(booking.stato_prenotazione)">
                 {{ booking.stato_prenotazione }}
               </span>
             </div>
-            <p class="text-xs text-gray-500">{{ booking.tipo_descrizione }}</p>
-            <div class="flex gap-4 mt-2 text-xs text-gray-400">
-              <span>📅 {{ booking.data_prenotazione }} (Intera Giornata)</span>
-              <span>✏️ Mod: {{ booking.modifiche_counter }}/2</span>
+            
+            <p class="text-sm font-bold text-zinc-500 uppercase tracking-wide mb-4">{{ booking.tipo_descrizione }}</p>
+            
+            <div class="flex flex-wrap gap-6 items-center">
+              <div class="flex flex-col">
+                <span class="text-[9px] font-black text-zinc-600 uppercase tracking-widest">Data Prenotazione</span>
+                <span class="text-sm text-gray-200 font-mono font-bold">{{ booking.data_prenotazione }}</span>
+              </div>
+              <div class="flex flex-col">
+                <span class="text-[9px] font-black text-zinc-600 uppercase tracking-widest">Modifiche</span>
+                <span class="text-sm font-mono font-bold" :class="booking.modifiche_counter >= 2 ? 'text-red-500' : 'text-zinc-300'">
+                  {{ booking.modifiche_counter }} / 2
+                </span>
+              </div>
+              <div v-if="booking.id_utente !== authStore.user?.id" class="flex flex-col border-l border-white/10 pl-6">
+                <span class="text-[9px] font-black text-[#ff4500]/60 uppercase tracking-widest">Proprietario</span>
+                <span class="text-sm text-zinc-300 font-bold uppercase italic">{{ booking.utente_nome }} {{ booking.utente_cognome }}</span>
+              </div>
             </div>
-            <p v-if="booking.id_utente !== authStore.user?.id" class="text-xs text-gray-500 mt-1">
-              👤 {{ booking.utente_nome }} {{ booking.utente_cognome }} (@{{ booking.username }})
-            </p>
           </div>
 
-          <!-- Actions -->
-          <div v-if="booking.stato_prenotazione === 'attiva'" class="flex gap-2 shrink-0">
+          <div v-if="booking.stato_prenotazione === 'attiva'" class="flex md:flex-col gap-3 shrink-0">
             <button
               v-if="booking.modifiche_counter < 2"
               @click="startEdit(booking)"
-              class="px-3 py-1.5 text-xs font-medium bg-sky-500/10 text-sky-400 rounded-lg hover:bg-sky-500/20 transition-colors cursor-pointer"
+              class="flex-1 md:flex-none px-6 py-3 text-[10px] font-black uppercase tracking-widest bg-white/5 text-white rounded-xl border border-white/10 hover:bg-white hover:text-black transition-all cursor-pointer"
             >
-              ✏️ Modifica
+              Modifica
             </button>
             <button
               @click="cancelBooking(booking.id)"
               :disabled="actionLoading === booking.id"
-              class="px-3 py-1.5 text-xs font-medium bg-red-500/10 text-red-400 rounded-lg hover:bg-red-500/20 transition-colors disabled:opacity-50 cursor-pointer"
+              class="flex-1 md:flex-none px-6 py-3 text-[10px] font-black uppercase tracking-widest bg-red-500/10 text-red-500 rounded-xl border border-red-500/20 hover:bg-red-500 hover:text-white transition-all disabled:opacity-30 cursor-pointer shadow-lg shadow-red-500/5"
             >
-              {{ authStore.isGestore ? '🚫 Revoca' : '❌ Cancella' }}
+              {{ authStore.isGestore ? 'Revoca' : 'Cancella' }}
             </button>
           </div>
         </div>
 
-        <!-- Inline Edit Form -->
-        <div v-if="editingBooking?.id === booking.id" class="mt-4 pt-4 border-t border-gray-800/50">
-          <div class="gap-3 max-w-sm">
-            <div>
-              <label class="block text-xs text-gray-500 mb-1">Nuova Data</label>
-              <input v-model="editData.data_prenotazione" type="date"
-                class="w-full px-3 py-2 bg-gray-800/50 border border-gray-700/50 rounded-lg text-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500/50" />
+        <Transition name="slide">
+          <div v-if="editingBooking?.id === booking.id" class="mt-8 pt-8 border-t border-white/5 bg-black/20 rounded-2xl p-6">
+            <div class="flex flex-col md:flex-row items-end gap-6">
+              <div class="flex-1 w-full">
+                <label class="block text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-3">Seleziona Nuova Data</label>
+                <input v-model="editData.data_prenotazione" type="date"
+                  class="w-full px-6 py-4 bg-zinc-900 border border-white/10 rounded-2xl text-white font-mono focus:ring-2 focus:ring-[#ff4500]/50 outline-none transition-all" />
+              </div>
+              <div class="flex gap-3 w-full md:w-auto">
+                <button @click="editingBooking = null" class="flex-1 px-8 py-4 text-[10px] font-black uppercase text-zinc-500 hover:text-white transition-colors">Annulla</button>
+                <button @click="saveEdit" :disabled="actionLoading === booking.id"
+                  class="flex-1 px-8 py-4 bg-sky-500 text-black font-black text-[10px] uppercase tracking-widest rounded-2xl hover:bg-sky-400 transition-all shadow-lg shadow-sky-500/20">
+                  Conferma Cambio
+                </button>
+              </div>
             </div>
           </div>
-          <div class="flex gap-2 mt-3 justify-end">
-            <button @click="editingBooking = null" class="px-3 py-1.5 text-xs text-gray-400 hover:text-gray-200 cursor-pointer">Annulla</button>
-            <button @click="saveEdit" :disabled="actionLoading === booking.id"
-              class="px-4 py-1.5 text-xs font-medium bg-sky-500 text-white rounded-lg hover:bg-sky-400 transition-colors disabled:opacity-50 cursor-pointer">
-              Salva Modifica
-            </button>
-          </div>
-        </div>
+        </Transition>
       </div>
     </div>
   </div>
 </template>
+
+<style scoped>
+.font-mono { font-variant-numeric: tabular-nums; }
+.fade-enter-active, .fade-leave-active { transition: opacity 0.3s ease; }
+.fade-enter-from, .fade-leave-to { opacity: 0; }
+
+.slide-enter-active, .slide-leave-active { transition: all 0.3s ease; max-height: 200px; }
+.slide-enter-from, .slide-leave-to { opacity: 0; max-height: 0; transform: translateY(-10px); }
+</style>
